@@ -19,7 +19,10 @@ impl Config {
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = fs::read_to_string(config.file_path)?;
 
-    println!("With text:\n{contents}");
+    for line in search(&config.query, &contents) {
+        println!("{line}");
+    }
+
     Ok(())
 }
 
@@ -46,5 +49,28 @@ safe, fast, productive.
 Pick three.";
 
         assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+    }
+
+    #[test]
+    fn multiple_results() {
+        let query = "body";
+        let contents = fs::read_to_string("poem.txt").unwrap();
+
+        assert_eq!(
+            vec![
+                "I'm nobody! Who are you?",
+                "Are you nobody, too?",
+                "How dreary to be somebody!"
+            ],
+            search(query, &contents)
+        );
+    }
+
+    #[test]
+    fn no_results() {
+        let query = "metamorphosis";
+        let contents = fs::read_to_string("poem.txt").unwrap();
+
+        assert_eq!(vec![] as Vec<&str>, search(query, &contents));
     }
 }
